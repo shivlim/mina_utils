@@ -14,7 +14,7 @@ NODE_NAME           = str(c["NODE_NAME"])
 GRAPHQL_HOST        = str(c["GRAPHQL_HOST"])
 GRAPHQL_PORT        = int(c["GRAPHQL_PORT"])
 
-bot=telegram.Bot(token=)
+bot=telegram.Bot(token=TELEGRAM_TOKEN)
 
 def get_node_status():
     coda = Client(graphql_host=GRAPHQL_HOST, graphql_port=GRAPHQL_PORT)
