@@ -50,3 +50,4 @@ if __name__ == "__main__":
     print(d["blockchainLength"])
     print(d["highestBlockLengthReceived"])
     print(d["nextBlockTime"])
+    send_message(CHAT_ID, d["sync_status"])
