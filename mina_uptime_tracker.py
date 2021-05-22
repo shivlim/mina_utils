@@ -47,6 +47,7 @@ def write_data_to_file(df):
 
 
 if __name__ == "__main__": 
-    df = get_data()
-    write_data_to_file(df)
-    sleep(60*5)
+    while True:
+        df = get_data()
+        write_data_to_file(df)
+        sleep(60*5)
