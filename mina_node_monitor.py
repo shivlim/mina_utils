@@ -71,7 +71,7 @@ def check_node_sync():
                     " blockchainLength: " + d["blockchainLength"] + \
                     " highestBlockLengthReceived: " + d["highestBlockLengthReceived"] + \
                     " highestUnvalidatedBlockLengthReceived: " + d["highestUnvalidatedBlockLengthReceived"] + \
-                    " nextBlockTime: " + d["nextBlockTime"]) 
+                    " nextBlockTime: " + str(d["nextBlockTime"])) 
         
         # print(d["sync_status"])
         # print(d["uptime"])
