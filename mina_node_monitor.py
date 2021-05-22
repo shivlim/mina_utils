@@ -45,8 +45,8 @@ def restart_node():
 
 if __name__ == "__main__":
     d = get_node_status()
-    print(d.sync_status)
-    print(d.uptime)
-    print(d.blockchainLength)
-    print(d.highestBlockLengthReceived)
-    print(d.nextBlockTime)
+    print(d["sync_status"])
+    print(d["uptime"])
+    print(d["blockchainLength"])
+    print(d["highestBlockLengthReceived"])
+    print(d["nextBlockTime"])
