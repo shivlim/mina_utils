@@ -37,6 +37,7 @@ def get_node_status():
                     "uptime": uptime, 
                     "blockchainLength": blockchainLength, 
                     "highestBlockLengthReceived": highestBlockLengthReceived, 
+                    "highestUnvalidatedBlockLengthReceived": highestUnvalidatedBlockLengthReceived,
                     "nextBlockTime": nextBlockTime
                 }
     except:
@@ -57,7 +58,7 @@ def check_node_sync():
     d = get_node_status()
 
     if d["sync_status"] == "SYNCED":
-        block_height_difference = int(d["highestBlockLengthReceived"]) -  int(d["highestBlockLengthReceived"])
+        block_height_difference = int(d["highestUnvalidatedBlockLengthReceived"]) -  int(d["blockchainLength"])
 
         if block_height_difference > ACCEPTABLE_BLOCK_DIFFERENCE:
             # routine for node not in sync starts
