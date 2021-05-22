@@ -67,10 +67,10 @@ def check_node_sync():
             msg = NODE_NAME + " in sync. Next block in " + str(d["nextBlockTime"])
             send_message(CHAT_ID, msg)
             print(d["sync_status"] + \
-                    " uptime: " + d["uptime"] + \
-                    " blockchainLength: " + d["blockchainLength"] + \
-                    " highestBlockLengthReceived: " + d["highestBlockLengthReceived"] + \
-                    " highestUnvalidatedBlockLengthReceived: " + d["highestUnvalidatedBlockLengthReceived"] + \
+                    " uptime: " + str(d["uptime"]) + \
+                    " blockchainLength: " + str(d["blockchainLength"]) + \
+                    " highestBlockLengthReceived: " + str(d["highestBlockLengthReceived"]) + \
+                    " highestUnvalidatedBlockLengthReceived: " + str(d["highestUnvalidatedBlockLengthReceived"]) + \
                     " nextBlockTime: " + str(d["nextBlockTime"])) 
         
         # print(d["sync_status"])
