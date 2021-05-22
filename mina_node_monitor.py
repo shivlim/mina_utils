@@ -63,12 +63,16 @@ def check_node_sync():
         if block_height_difference > ACCEPTABLE_BLOCK_DIFFERENCE:
             # routine for node not in sync starts
             restart_node()
-            sleep(60*15)    
         else:
             msg = NODE_NAME + " in sync. Next block in " + str(d["nextBlockTime"])
             send_message(CHAT_ID, msg)
-            sleep(60*15)
-
+            print(d["sync_status"] + \
+                    " uptime: " + d["uptime"] + \
+                    " blockchainLength: " + d["blockchainLength"] + \
+                    " highestBlockLengthReceived: " + d["highestBlockLengthReceived"] + \
+                    " highestUnvalidatedBlockLengthReceived: " + d["highestUnvalidatedBlockLengthReceived"] + \
+                    " nextBlockTime: " + d["nextBlockTime"]) 
+        
         # print(d["sync_status"])
         # print(d["uptime"])
         # print(d["blockchainLength"])
@@ -78,14 +82,13 @@ def check_node_sync():
     elif d["sync_status"] == "CATCHUP":
         msg = NODE_NAME + " in catchup mode"
         send_message(CHAT_ID, msg)
-        sleep(60*15)
     
     else:
         msg = NODE_NAME + " in unknown mode. Attention required"
         send_message(CHAT_ID, msg)
-        sleep(60*15)
 
 if __name__ == "__main__":    
     while True:
         check_node_sync()
+        sleep(60*15)
     
