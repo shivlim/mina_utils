@@ -3,8 +3,9 @@ import sys
 import yaml
 import datetime
 import telegram
+import os
 from CodaClient import Client
-
+from time import sleep
 
 c = yaml.load(open('config.yml', encoding='utf8'), Loader=yaml.SafeLoader)
 
@@ -39,9 +40,13 @@ def send_message(chat_id, msg):
 
 def restart_node():
     #restart mina daemon
+    os.system("systemctl --user restart mina")
+    print("restarting mina daemon...")
+    sleep(15)
     #restart sidecar
+    os.system("service mina-bp-stats-sidecar restart")
     #update telegram on restart
-    pass
+    send_message(CHAT_ID, "mina daemon has been restarted")
 
 if __name__ == "__main__":
     d = get_node_status()
@@ -51,3 +56,4 @@ if __name__ == "__main__":
     print(d["highestBlockLengthReceived"])
     print(d["nextBlockTime"])
     send_message(CHAT_ID, d["sync_status"])
+    restart_node()
