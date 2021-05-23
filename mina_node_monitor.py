@@ -80,13 +80,6 @@ def check_node_sync():
                     str(d["highestBlockLengthReceived"]) + "|" + str(d["highestUnvalidatedBlockLengthReceived"]) + "|" + \
                     str(delta_height) + "|" + next_block_in + "| "
         
-        # initiating COUNT for the first run if the node is not in sync
-        try:
-            COUNT
-        except NameError:
-            COUNT = 0
-            print("COUNT is set")
-
         # Action logic for different scenarios
         if d["sync_status"] == "SYNCED" and delta_height == 0: #perfect scenario
             msg = base_msg + "no action taken"
@@ -113,7 +106,9 @@ def check_node_sync():
             msg = base_msg + " in unknown mode. Attention required"
             send_message(CHAT_ID, msg)
 
-if __name__ == "__main__":    
+if __name__ == "__main__": 
+    # initiating COUNT for the first run 
+    COUNT = 0   
     while True:
         check_node_sync()
         sleep(60*CHECK_FREQ_IN_MIN)
