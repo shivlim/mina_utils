@@ -77,7 +77,7 @@ def check_node_sync():
 
         base_msg = current_time + "|" + NODE_NAME + "|" + d["sync_status"] + "|" + uptime_readable + "|" + str(d["blockchainLength"]) + "|" + \
                     str(d["highestBlockLengthReceived"]) + "|" + str(d["highestUnvalidatedBlockLengthReceived"]) + "|" + \
-                    delta_height + "|" + next_block_in + "| "
+                    str(delta_height) + "|" + next_block_in + "| "
         
         # initiating COUNT for the first run if the node is not in sync
         try:
