@@ -1,7 +1,7 @@
 import time
+import datetime
 import sys
 import yaml
-import datetime
 import telegram
 import os
 from MinaPyClient import Client
@@ -14,7 +14,7 @@ CHAT_ID             = str(c["CHAT_ID"])
 NODE_NAME           = str(c["NODE_NAME"])
 GRAPHQL_HOST        = str(c["GRAPHQL_HOST"])
 GRAPHQL_PORT        = int(c["GRAPHQL_PORT"])
-ACCEPTABLE_BLOCK_DIFFERENCE        = int(c["ACCEPTABLE_BLOCK_DIFFERENCE"])
+WAIT_TIME_IN_CHECKS        = int(c["WAIT_TIME_IN_CHECKS"])
 
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
 
@@ -23,26 +23,29 @@ def send_message(chat_id, msg):
     bot.sendMessage(chat_id=chat_id, text=msg)
 
 def get_node_status():
-    try:
-        coda = Client(graphql_host=GRAPHQL_HOST, graphql_port=GRAPHQL_PORT)
-        daemon_status = coda.get_daemon_status()
-        sync_status = daemon_status['daemonStatus']['syncStatus']
-        uptime = daemon_status['daemonStatus']['uptimeSecs'] 	
-        blockchainLength = daemon_status['daemonStatus']['blockchainLength']
-        highestBlockLengthReceived = daemon_status['daemonStatus']['highestBlockLengthReceived']
-        highestUnvalidatedBlockLengthReceived = daemon_status['daemonStatus']['highestUnvalidatedBlockLengthReceived']
-        nextBlockTime = daemon_status['daemonStatus']['nextBlockProduction']['times'][0]['startTime']
+    attempts = 0
+    while attempts < 3: # tries 3 times to get node status before raising exception
+        try:
+            coda = Client(graphql_host=GRAPHQL_HOST, graphql_port=GRAPHQL_PORT)
+            daemon_status = coda.get_daemon_status()
+            sync_status = daemon_status['daemonStatus']['syncStatus']
+            uptime = daemon_status['daemonStatus']['uptimeSecs'] 	
+            blockchainLength = daemon_status['daemonStatus']['blockchainLength']
+            highestBlockLengthReceived = daemon_status['daemonStatus']['highestBlockLengthReceived']
+            highestUnvalidatedBlockLengthReceived = daemon_status['daemonStatus']['highestUnvalidatedBlockLengthReceived']
+            nextBlockTime = daemon_status['daemonStatus']['nextBlockProduction']['times'][0]['startTime']
 
-        return {    "sync_status": sync_status, 
-                    "uptime": uptime, 
-                    "blockchainLength": blockchainLength, 
-                    "highestBlockLengthReceived": highestBlockLengthReceived, 
-                    "highestUnvalidatedBlockLengthReceived": highestUnvalidatedBlockLengthReceived,
-                    "nextBlockTime": nextBlockTime
-                }
-    except:
-        msg = "unable to reach mina daemon. Attention required!!!"
-        send_message(CHAT_ID, msg)
+            return {    "sync_status": sync_status, 
+                        "uptime": uptime, 
+                        "blockchainLength": blockchainLength, 
+                        "highestBlockLengthReceived": highestBlockLengthReceived, 
+                        "highestUnvalidatedBlockLengthReceived": highestUnvalidatedBlockLengthReceived,
+                        "nextBlockTime": nextBlockTime
+                    }
+        except:
+            attempts += 1
+            if attempts == 2:
+                return None
 
 def restart_node():
     #restart mina daemon
@@ -57,38 +60,56 @@ def restart_node():
 def check_node_sync():
     d = get_node_status()
 
-    if d["sync_status"] == "SYNCED":
-        block_height_difference = int(d["highestUnvalidatedBlockLengthReceived"]) -  int(d["blockchainLength"])
-
-        if block_height_difference > ACCEPTABLE_BLOCK_DIFFERENCE:
-            # routine for node not in sync starts
-            restart_node()
-        else:
-            msg = NODE_NAME + " in sync. Next block in " + str(d["nextBlockTime"])
-            send_message(CHAT_ID, msg)
-            print(d["sync_status"] + \
-                    " uptime: " + str(d["uptime"]) + \
-                    " blockchainLength: " + str(d["blockchainLength"]) + \
-                    " highestBlockLengthReceived: " + str(d["highestBlockLengthReceived"]) + \
-                    " highestUnvalidatedBlockLengthReceived: " + str(d["highestUnvalidatedBlockLengthReceived"]) + \
-                    " nextBlockTime: " + str(d["nextBlockTime"])) 
-        
-        # print(d["sync_status"])
-        # print(d["uptime"])
-        # print(d["blockchainLength"])
-        # print(d["highestBlockLengthReceived"])
-        # print(d["nextBlockTime"])
-            
-    elif d["sync_status"] == "CATCHUP":
-        msg = NODE_NAME + " in catchup mode"
+    if d == None:
+        msg = "unable to reach mina daemon. Attention required!!!"
         send_message(CHAT_ID, msg)
-    
     else:
-        msg = NODE_NAME + " in unknown mode. Attention required"
-        send_message(CHAT_ID, msg)
+        delta_height = int(d["highestUnvalidatedBlockLengthReceived"]) -  int(d["blockchainLength"])
+
+        current_epoch_time = int(time.time()*1000)
+
+        next_block_in_sec = int(d["nextBlockTime"]) - current_epoch_time
+        next_block_in = str(datetime.timedelta(milliseconds=next_block_in_sec))
+
+        uptime_readable = str(datetime.timedelta(seconds=d["uptime"]))
+
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        base_msg = current_time + "|" + NODE_NAME + "|" + d["sync_status"] + "|" + uptime_readable + "|" + str(d["blockchainLength"]) + "|" + \
+                    str(d["highestBlockLengthReceived"]) + "|" + str(d["highestUnvalidatedBlockLengthReceived"]) + "|" + \
+                    delta_height + "|" + next_block_in + "| "
+        
+        # initiating COUNT for the first run if the node is not in sync
+        try:
+            COUNT
+        except NameError:
+            COUNT = 0
+
+        # Action logic for different scenarios
+        if d["sync_status"] == "SYNCED" and delta_height == 0: #perfect scenario
+            msg = base_msg + "no action taken"
+            send_message(CHAT_ID, msg)
+            print(msg)
+            COUNT = 0
+
+
+        elif d["sync_status"] in {"SYNCED","CATCHUP"} and COUNT <= WAIT_TIME_IN_CHECKS: #OK to wait a few minutes    
+            msg = base_msg + "waiting for few mins" 
+            send_message(CHAT_ID, msg)
+            COUNT += 1
+
+        elif d["sync_status"] in {"SYNCED","CATCHUP"}  and COUNT > WAIT_TIME_IN_CHECKS: #restart routine  
+            msg = base_msg + "restarting node"  
+            send_message(CHAT_ID, msg)
+            restart_node()
+            COUNT = 0   
+          
+        else:
+            msg = base_msg + " in unknown mode. Attention required"
+            send_message(CHAT_ID, msg)
 
 if __name__ == "__main__":    
     while True:
         check_node_sync()
-        sleep(60*15)
+        sleep(60*5)
     
