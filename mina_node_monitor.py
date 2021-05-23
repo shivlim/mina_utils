@@ -86,14 +86,14 @@ def check_node_sync():
             msg = base_msg + "no action taken"
             send_message(CHAT_ID, msg)
             print(msg)
-            COUNT = 0
+            global COUNT = 0
 
 
         elif d["sync_status"] in {"SYNCED","CATCHUP"} and COUNT <= WAIT_TIME_IN_CHECKS: #OK to wait a few minutes    
             msg = base_msg + "waiting for few mins" 
             send_message(CHAT_ID, msg)
             print(msg)
-            COUNT = COUNT + 1
+            global COUNT = COUNT + 1
             print("the attempt number is : " + str(COUNT))
 
         elif d["sync_status"] in {"SYNCED","CATCHUP"}  and COUNT > WAIT_TIME_IN_CHECKS: #restart routine  
@@ -101,7 +101,7 @@ def check_node_sync():
             send_message(CHAT_ID, msg)
             print(msg)
             restart_node()
-            COUNT = 0   
+            global COUNT = 0   
           
         else:
             msg = base_msg + " in unknown mode. Attention required"
