@@ -85,6 +85,7 @@ def check_node_sync():
             COUNT
         except NameError:
             COUNT = 0
+            print("COUNT is set")
 
         # Action logic for different scenarios
         if d["sync_status"] == "SYNCED" and delta_height == 0: #perfect scenario
