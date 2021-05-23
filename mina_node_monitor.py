@@ -15,6 +15,7 @@ NODE_NAME           = str(c["NODE_NAME"])
 GRAPHQL_HOST        = str(c["GRAPHQL_HOST"])
 GRAPHQL_PORT        = int(c["GRAPHQL_PORT"])
 WAIT_TIME_IN_CHECKS        = int(c["WAIT_TIME_IN_CHECKS"])
+CHECK_FREQ_IN_MIN        = int(c["CHECK_FREQ_IN_MIN"])
 
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
 
@@ -96,11 +97,14 @@ def check_node_sync():
         elif d["sync_status"] in {"SYNCED","CATCHUP"} and COUNT <= WAIT_TIME_IN_CHECKS: #OK to wait a few minutes    
             msg = base_msg + "waiting for few mins" 
             send_message(CHAT_ID, msg)
-            COUNT += 1
+            print(msg)
+            COUNT = COUNT + 1
+            print("the attempt number is : " + str(COUNT))
 
         elif d["sync_status"] in {"SYNCED","CATCHUP"}  and COUNT > WAIT_TIME_IN_CHECKS: #restart routine  
             msg = base_msg + "restarting node"  
             send_message(CHAT_ID, msg)
+            print(msg)
             restart_node()
             COUNT = 0   
           
@@ -111,5 +115,5 @@ def check_node_sync():
 if __name__ == "__main__":    
     while True:
         check_node_sync()
-        sleep(60*5)
+        sleep(60*CHECK_FREQ_IN_MIN)
     
