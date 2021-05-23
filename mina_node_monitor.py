@@ -19,6 +19,7 @@ CHECK_FREQ_IN_MIN        = int(c["CHECK_FREQ_IN_MIN"])
 
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
 
+COUNT = 0 
 
 def send_message(chat_id, msg):
     bot.sendMessage(chat_id=chat_id, text=msg)
@@ -107,8 +108,7 @@ def check_node_sync():
             send_message(CHAT_ID, msg)
 
 if __name__ == "__main__": 
-    # initiating COUNT for the first run 
-    COUNT = 0   
+       
     while True:
         check_node_sync()
         sleep(60*CHECK_FREQ_IN_MIN)
