@@ -53,7 +53,7 @@ def restart_node():
     #restart mina daemon
     os.system("systemctl --user restart mina")
     print("restarting mina daemon...")
-    sleep(15)
+    sleep(60*5)
     #restart sidecar
     os.system("service mina-bp-stats-sidecar restart")
     #update telegram on restart
