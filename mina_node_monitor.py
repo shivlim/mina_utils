@@ -19,8 +19,7 @@ WAIT_TIME_IN_CHECKS        = int(c["WAIT_TIME_IN_CHECKS"])
 CHECK_FREQ_IN_MIN        = int(c["CHECK_FREQ_IN_MIN"])
 
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
-ln = logging.getLogger()
-ln.setLevel('INFO')
+
 
 COUNT = 0 
 
@@ -32,10 +31,13 @@ def record_status(msg):
     # this is for the console
     print(msg) 
     
-    # to record in log file    
+    # to record in log file  
+    ln = logging.getLogger('main_logger')
+    ln.setLevel('INFO')  
     fh = logging.FileHandler('nodestatus_logs/nodestatus_{:%Y%m%d}.log'.format(datetime.datetime.now()))
     ln.addHandler(fh)
     ln.info(msg)
+    ln.handlers.clear() # to avoid multiple instances of loggers getting created
 
 def get_node_status():
     attempts = 0
