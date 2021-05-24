@@ -6,6 +6,7 @@ import telegram
 import os
 from MinaPyClient import Client
 from time import sleep
+import logging
 
 c = yaml.load(open('config.yml', encoding='utf8'), Loader=yaml.SafeLoader)
 
@@ -21,8 +22,19 @@ bot=telegram.Bot(token=TELEGRAM_TOKEN)
 
 COUNT = 0 
 
-def send_message(chat_id, msg):
+def record_status(msg):
+    # sending a telgram message
+    chat_id = CHAT_ID
     bot.sendMessage(chat_id=chat_id, text=msg)
+    
+    # this is for the console
+    print(msg) 
+    
+    # to record in log file
+    ln = logging.getLogger()
+    fh = logging.FileHandler('nodestatus_logs/nodestatus_{:%Y%m%d}.log'.format(datetime.datetime.now()))
+    ln.addHandler(fh)
+    ln.info(msg)
 
 def get_node_status():
     attempts = 0
@@ -52,30 +64,25 @@ def get_node_status():
 def restart_node():
     #restart mina daemon
     os.system("systemctl --user restart mina")
-    print("restarting mina daemon...")
     sleep(60*5)
     #restart sidecar
     os.system("service mina-bp-stats-sidecar restart")
     #update telegram on restart
-    send_message(CHAT_ID, "mina daemon has been restarted")
+    record_status(NODE_NAME + " | mina daemon and sidecar has been restarted")
 
 def check_node_sync():
     d = get_node_status()
     global COUNT
 
     if d == None:
-        msg = "unable to reach mina daemon. Attention required!!!"
-        send_message(CHAT_ID, msg)
+        msg = NODE_NAME + " | unable to reach mina daemon. Attention required!!!"
+        record_status(msg)
     else:
         delta_height = int(d["highestUnvalidatedBlockLengthReceived"]) -  int(d["blockchainLength"])
-
         current_epoch_time = int(time.time()*1000)
-
         next_block_in_sec = int(d["nextBlockTime"]) - current_epoch_time
-        next_block_in = str(datetime.timedelta(milliseconds=next_block_in_sec))
-
+        next_block_in = str(datetime.timedelta(milliseconds=next_block_in_sec)).split(".")[0]
         uptime_readable = str(datetime.timedelta(seconds=d["uptime"]))
-
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         base_msg = current_time + "|" + NODE_NAME + "|" + d["sync_status"] + "|" + uptime_readable + "|" + str(d["blockchainLength"]) + "|" + \
@@ -85,28 +92,24 @@ def check_node_sync():
         # Action logic for different scenarios
         if d["sync_status"] == "SYNCED" and delta_height == 0: #perfect scenario
             msg = base_msg + "no action taken"
-            send_message(CHAT_ID, msg)
-            print(msg)
+            record_status(msg)
             COUNT = 0
 
 
         elif d["sync_status"] in {"SYNCED","CATCHUP"} and COUNT <= WAIT_TIME_IN_CHECKS: #OK to wait a few minutes    
             msg = base_msg + "waiting for few mins" 
-            send_message(CHAT_ID, msg)
-            print(msg)
+            record_status(msg)
             COUNT = COUNT + 1
-            print("the attempt number is : " + str(COUNT))
 
         elif d["sync_status"] in {"SYNCED","CATCHUP"}  and COUNT > WAIT_TIME_IN_CHECKS: #restart routine  
             msg = base_msg + "restarting node"  
-            send_message(CHAT_ID, msg)
-            print(msg)
+            record_status(msg)
             restart_node()
             COUNT = 0   
           
         else:
             msg = base_msg + " in unknown mode. Attention required"
-            send_message(CHAT_ID, msg)
+            record_status(msg)
 
 if __name__ == "__main__": 
        
