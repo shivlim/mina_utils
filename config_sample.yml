@@ -1,0 +1,22 @@
+#Rename this file to config.yml
+
+# Name of the node. Shows in the logs
+NODE_NAME : XXXX
+
+# Telegram configurations:
+# Creating a bot and getting bot token : https://core.telegram.org/bots#6-botfather
+TELEGRAM_TOKEN: xxxxxxxxx:xxxxxxxxxxxxxxxxxxx-xxxxxxxxx
+
+# Getting telegram Chat ID
+# 1) Add the newly created bot to a group
+# 2) Go to this URL : https://api.telegram.org/bot<YourBOTToken>/getUpdates
+CHAT_ID : xxxxxxxxx
+
+
+# No of checks to wait before a restart routine is triggered. Starts at 0.
+WAIT_TIME_IN_CHECKS : 2
+CHECK_FREQ_IN_MIN : 5
+
+# Node daemon connection details
+GRAPHQL_HOST : 127.0.0.1
+GRAPHQL_PORT : 3085
