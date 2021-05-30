@@ -11,7 +11,7 @@ TELEGRAM_TOKEN: xxxxxxxxx:xxxxxxxxxxxxxxxxxxx-xxxxxxxxx
 # 1) Add the newly created bot to a group
 # 2) Go to this URL : https://api.telegram.org/bot<YourBOTToken>/getUpdates
 CHAT_ID : xxxxxxxxx
-
+CHAT_ID_ALERT : xxxxxxxxx
 
 # No of checks to wait before a restart routine is triggered. Starts at 0.
 WAIT_TIME_IN_CHECKS : 2

@@ -12,6 +12,7 @@ c = yaml.load(open('config.yml', encoding='utf8'), Loader=yaml.SafeLoader)
 
 TELEGRAM_TOKEN      = str(c["TELEGRAM_TOKEN"])
 CHAT_ID             = str(c["CHAT_ID"])
+CHAT_ID_ALERT       = str(c["CHAT_ID_ALERT"])
 NODE_NAME           = str(c["NODE_NAME"])
 GRAPHQL_HOST        = str(c["GRAPHQL_HOST"])
 GRAPHQL_PORT        = int(c["GRAPHQL_PORT"])
@@ -23,10 +24,15 @@ bot=telegram.Bot(token=TELEGRAM_TOKEN)
 
 COUNT = 0 
 
-def record_status(msg):
+def record_status(msg, type="standard"):
     # sending a telgram message
     chat_id = CHAT_ID
-    bot.sendMessage(chat_id=chat_id, text=msg)
+    chat_id_alert  = CHAT_ID_ALERT
+    bot.sendMessage(chat_id=chat_id, text=msg, timeout=20)
+
+    # additional message to the alert channel
+    if type=="alert":
+        bot.sendMessage(chat_id=chat_id_alert, text=msg, timeout=20)
     
     # this is for the console
     print(msg) 
@@ -50,7 +56,10 @@ def get_node_status():
             blockchainLength = daemon_status['daemonStatus']['blockchainLength']
             highestBlockLengthReceived = daemon_status['daemonStatus']['highestBlockLengthReceived']
             highestUnvalidatedBlockLengthReceived = daemon_status['daemonStatus']['highestUnvalidatedBlockLengthReceived']
-            nextBlockTime = daemon_status['daemonStatus']['nextBlockProduction']['times'][0]['startTime']
+            try:
+                nextBlockTime = daemon_status['daemonStatus']['nextBlockProduction']['times'][0]['startTime']
+            else:
+                nextBlockTime = "UNKNOWN"
 
             return {    "sync_status": sync_status, 
                         "uptime": uptime, 
@@ -79,7 +88,7 @@ def check_node_sync():
 
     if d == None:
         msg = NODE_NAME + " | unable to reach mina daemon. Attention required!!!"
-        record_status(msg)
+        record_status(msg, type='alert')
     else:
         delta_height = int(d["highestUnvalidatedBlockLengthReceived"]) -  int(d["blockchainLength"])
         current_epoch_time = int(time.time()*1000)
@@ -101,18 +110,18 @@ def check_node_sync():
 
         elif d["sync_status"] in {"SYNCED","CATCHUP"} and COUNT <= WAIT_TIME_IN_CHECKS: #OK to wait a few minutes    
             msg = base_msg + "waiting for few mins" 
-            record_status(msg)
+            record_status(msg, type='alert')
             COUNT = COUNT + 1
 
         elif d["sync_status"] in {"SYNCED","CATCHUP"}  and COUNT > WAIT_TIME_IN_CHECKS: #restart routine  
             msg = base_msg + "restarting node"  
-            record_status(msg)
+            record_status(msg, type='alert')
             restart_node()
             COUNT = 0   
           
         else:
             msg = base_msg + " in unknown mode. Attention required"
-            record_status(msg)
+            record_status(msg, type='alert')
 
 if __name__ == "__main__": 
        
