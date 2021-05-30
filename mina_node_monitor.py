@@ -58,7 +58,7 @@ def get_node_status():
             highestUnvalidatedBlockLengthReceived = daemon_status['daemonStatus']['highestUnvalidatedBlockLengthReceived']
             try:
                 nextBlockTime = daemon_status['daemonStatus']['nextBlockProduction']['times'][0]['startTime']
-            else:
+            except:
                 nextBlockTime = "UNKNOWN"
 
             return {    "sync_status": sync_status, 
