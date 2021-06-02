@@ -90,7 +90,11 @@ def check_node_sync():
         msg = NODE_NAME + " | unable to reach mina daemon. Attention required!!!"
         record_status(msg, type='alert')
     else:
-        delta_height = int(d["highestUnvalidatedBlockLengthReceived"]) -  int(d["blockchainLength"])
+        try: #fix for issue with length provided as NoneType by daemon
+            delta_height = int(d["highestUnvalidatedBlockLengthReceived"]) -  int(d["blockchainLength"])
+        except:
+            delta_height = "NA"
+    
         current_epoch_time = int(time.time()*1000)
         next_block_in_sec = int(d["nextBlockTime"]) - current_epoch_time
         next_block_in = str(datetime.timedelta(milliseconds=next_block_in_sec)).split(".")[0]
@@ -126,6 +130,10 @@ def check_node_sync():
 if __name__ == "__main__": 
        
     while True:
-        check_node_sync()
+        try:
+            check_node_sync()
+        except Exception as e:
+            msg = str(e)
+            record_status(msg, type='alert')
         sleep(60*CHECK_FREQ_IN_MIN)
     
