@@ -59,7 +59,7 @@ def get_node_status():
             try:
                 nextBlockTime = daemon_status['daemonStatus']['nextBlockProduction']['times'][0]['startTime']
             except:
-                nextBlockTime = "UNKNOWN"
+                nextBlockTime = 100000
 
             return {    "sync_status": sync_status, 
                         "uptime": uptime, 
