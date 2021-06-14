@@ -7,6 +7,7 @@ import os
 from MinaPyClient import Client
 from time import sleep
 import logging
+import subprocess
 
 c = yaml.load(open('config.yml', encoding='utf8'), Loader=yaml.SafeLoader)
 
@@ -82,6 +83,14 @@ def restart_node():
     #update telegram on restart
     record_status(NODE_NAME + " | mina daemon and sidecar has been restarted")
 
+def checksidecarstatusandrestart():
+    command = 'journalctl -u mina-bp-stats-sidecar.service --since "10 minutes ago" | grep -c "Got block data"'
+    output,error  = subprocess.Popen(command, universal_newlines=True, shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    print(f'Total sidecar updates sent in 10 mts is {output}.')
+    if int(output) < 2:
+       os.system("service mina-bp-stats-sidecar restart")
+       record_status(NODE_NAME + " | sidecar has been restarted")
+
 def check_node_sync():
     d = get_node_status()
     global COUNT
@@ -132,6 +141,7 @@ if __name__ == "__main__":
     while True:
         try:
             check_node_sync()
+            checksidecarstatusandrestart()
         except Exception as e:
             msg = str(e)
             record_status(msg, type='alert')
