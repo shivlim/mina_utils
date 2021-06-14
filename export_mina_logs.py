@@ -6,12 +6,13 @@ import time
 
 c = yaml.load(open('config.yml', encoding='utf8'), Loader=yaml.SafeLoader)
 
+NODE_NAME           = str(c["NODE_NAME"])
 ACCESS_KEY      = str(c["AWS_ACCESS_KEY"])
 SECRET_KEY      = str(c["AWS_SECRET_KEY"])
 
 current_time = time.strftime("%Y%m%d_%H%M")
 
-fn = 'mina_log_' + str(current_time)
+fn = NODE_NAME + '_mina_log_' + str(current_time)
 local_file = '/root/.mina-config/exported_logs/' + fn + '.tar.gz'
 
 bucket_name = 'mina-node-logs'
