@@ -8,6 +8,8 @@ from MinaPyClient import Client
 from time import sleep
 import logging
 import subprocess
+import urllib.request
+import json
 
 c = yaml.load(open('config.yml', encoding='utf8'), Loader=yaml.SafeLoader)
 
@@ -23,7 +25,9 @@ CHECK_FREQ_IN_MIN        = int(c["CHECK_FREQ_IN_MIN"])
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
 
 
-COUNT = 0 
+COUNT = 0
+
+
 
 def record_status(msg, type="standard"):
     # sending a telgram message
@@ -45,6 +49,19 @@ def record_status(msg, type="standard"):
     ln.addHandler(fh)
     ln.info(msg)
     ln.handlers.clear() # to avoid multiple instances of loggers getting created
+
+
+def getminaexplorerblockheight():
+    try:
+        url = 'https://api.minaexplorer.com/'
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        r = urllib.request.urlopen(req).read()
+        content = json.loads(r.decode('utf-8'))
+        return int(content['blockchainLength'])
+    except:
+        record_status("unable to retrieve height from minaexplorer")
+        return None
+
 
 def get_node_status():
     attempts = 0
@@ -113,6 +130,13 @@ def check_node_sync():
         base_msg = current_time + "|" + NODE_NAME + "|" + d["sync_status"] + "|" + uptime_readable + "|" + str(d["blockchainLength"]) + "|" + \
                     str(d["highestBlockLengthReceived"]) + "|" + str(d["highestUnvalidatedBlockLengthReceived"]) + "|" + \
                     str(delta_height) + "|" + next_block_in + "| "
+
+        minaexplorerblockheight = getminaexplorerblockheight()
+        if minaexplorerblockheight is not None and minaexplorerblockheight - int(d["blockchainLength"]) > 2:
+            restart_node()
+            msg = base_msg + " synced on wrong height.Actual height is " + "|" + str(minaexplorerblockheight)
+            record_status(msg, type='alert')
+
         
         # Action logic for different scenarios
         if d["sync_status"] == "SYNCED" and delta_height == 0: #perfect scenario
