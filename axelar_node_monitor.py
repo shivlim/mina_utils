@@ -88,7 +88,7 @@ def formatinmarkdown(input):
                 not noproxyregisteredstatus or not tsssuspendedstatus or not proxyinsuficientfundsstatus \
                 or not staletssheartbeatstatus:
                 print(f'status is not correct {tss_illegibility_info}.Sending telegram RED alert ❌')
-                MARKDOWN_ALERT.format(
+                formatted_text = MARKDOWN_ALERT.format(
                     tombstonedstatus="❌" if tss_illegibility_info['tombstoned'] else "✅",
                     jailedstatus="❌" if tss_illegibility_info['jailed'] else "✅",
                     missedtoomanyblocksstatus="❌" if tss_illegibility_info['missed_too_many_blocks'] else "✅",
@@ -97,7 +97,8 @@ def formatinmarkdown(input):
                     proxyinsuficientfundsstatus="❌" if tss_illegibility_info['proxy_insuficient_funds'] else "✅",
                     staletssheartbeatstatus="❌" if tss_illegibility_info['stale_tss_heartbeat'] else "✅"
                 )
-                return MARKDOWN_ALERT
+                print(f'formatted_text {formatted_text}')
+                return formatted_text
     else:
         return None
 
