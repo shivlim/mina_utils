@@ -76,63 +76,13 @@ def getminaexplorerblockheight():
         return None
 
 
-def get_node_status():
-    attempts = 0
-    while attempts < 3: # tries 3 times to get node status before raising exception
-        try:
-            coda = Client(graphql_host=GRAPHQL_HOST, graphql_port=GRAPHQL_PORT)
-            daemon_status = coda.get_daemon_status()
-            sync_status = daemon_status['daemonStatus']['syncStatus']
-            uptime = daemon_status['daemonStatus']['uptimeSecs'] 	
-            blockchainLength = daemon_status['daemonStatus']['blockchainLength']
-            highestBlockLengthReceived = daemon_status['daemonStatus']['highestBlockLengthReceived']
-            highestUnvalidatedBlockLengthReceived = daemon_status['daemonStatus']['highestUnvalidatedBlockLengthReceived']
-            try:
-                nextBlockTime = daemon_status['daemonStatus']['nextBlockProduction']['times'][0]['startTime']
-            except:
-                nextBlockTime = 100000
 
-            return {    "sync_status": sync_status, 
-                        "uptime": uptime, 
-                        "blockchainLength": blockchainLength, 
-                        "highestBlockLengthReceived": highestBlockLengthReceived, 
-                        "highestUnvalidatedBlockLengthReceived": highestUnvalidatedBlockLengthReceived,
-                        "nextBlockTime": nextBlockTime
-                    }
-        except:
-            attempts += 1
-            if attempts == 2:
-                return None
-
-def restart_node():
-    #restart mina daemon
-    os.system("systemctl --user restart mina")
-    sleep(60*5)
-    #restart sidecar
-    os.system("service mina-bp-stats-sidecar restart")
-    #update telegram on restart
-    record_status(NODE_NAME + " | mina daemon and sidecar has been restarted")
-
-def checksidecarstatusandrestart():
-    command = 'journalctl -u mina-bp-stats-sidecar.service --since "10 minutes ago" | grep -c "Got block data"'
-    output,error  = subprocess.Popen(command, universal_newlines=True, shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    print(f'Total sidecar updates sent in 10 mts is {output}.')
-    if int(output) < 2:
-       os.system("service mina-bp-stats-sidecar restart")
-       record_status(NODE_NAME + " | sidecar has been restarted")
-
-'''
-docker exec -it axelar-core axelard q snapshot validators -oj
-{"validators":[{"operator_address":"axelarvaloper1uxa5r6hpd5vla6tndduhxr8gpsv5jfjgczrlwr","moniker":"stakewithjenni.com","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1pjnjylsjqsnzencyekjfge3e5j02vfksld77qt","moniker":"axelar-core-4","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1yz6zaad8nm29lxlkxzruun999vpxeecqq8skzl","moniker":"axelar-core-2","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1s6fsqpapzgpy0wq7jd69rcnavmhnwppun6etgs","moniker":"axelar-core-3","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1msctzg2qy4m5x26u30qwmxryxx2ph2rfcxejy5","moniker":"axelar-core-0","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper178t88epaxcls5xw7x9j94v80u4yzdemkpgsh5c","moniker":"axelar-core-1","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1sk5eesurd9elqpguevnddcfhv9fzh8mfdnwprl","moniker":"QuantNode","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper12e37vdgl2uc7kk3wu0d2qpkuwgyy7w87cc34kq","moniker":"0base.vc","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper1nzml6v997w56q5hgd784eq0g9mvhd7mzngyatn","moniker":"Brightlystake","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1jj77l8y967tp4ace7xauppsmzpmr58fzzjfuws","moniker":"provenance-io","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper19eh7p42svuq2acc6vt2nnq7jjjljgwz3zguztv","moniker":"Simple","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1s6zaztmpl6zw453rj6r8uhtch5ttx3sht7vh7s","moniker":"ChainodeTech","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper1cmxzk4y53rqng0a67erfqq90xh4l024qm2nywf","moniker":"Imperator.co","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper1xu9d223797jud23u53rkk5zy9gwy730d62rvd8","moniker":"ushakov","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1n6ngamqpex44r5tcs36qhh50qxxupfcujxl5wz","moniker":"Figment","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper1uf0ndewjqarwcg9aw68xlxc66adflcfzjdnmvq","moniker":"StakeLab","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper1p08lmvp7qy7zs7zsj38shuht0hp00a78q99sum","moniker":"Everstake","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1xvlsqqvdlr7kdydkfyvksnsrvnd3xwuts4653h","moniker":"Staketab","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1x5wgh6vwye60wv3dtshs9dmqggwfx2ldh0v54p","moniker":"Cosmostation","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper18s4m4m32zqq63nxr6rxy905d6z69xervxdfh7a","moniker":"qubelabs","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1243yj8nwd4c6dcqxtg7lhltsslv58dhpkjjxdf","moniker":"CoinHippo","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1trq5mef4pjg48ntxpu87pl4a22ktycsjz7ecfa","moniker":"Forbole","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper140u2t5w8pacdpf64lw8p5l7vaz48k66pje724m","moniker":"B-Harvest","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1klj7fs4d63krf2vpcts3wc5csadl9tdsfuz9mh","moniker":"KingSuper","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1j7wdwde5mwzh3t46jfr4v44vl64eu45mpvjvl2","moniker":"LunaNova","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":false,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1znh6mlka900nptlgcqpv39m79m6a6nylj3ehad","moniker":"ROOIIE","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper12axgn9a2hlk7ljjxfxaqd4xdjfsru3j3e2585m","moniker":"MZONDER_NODE","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1wsw3n6wrc0ku3jn9c46rvz4q2ueldwrx0x0rk3","moniker":"4SV","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}},{"operator_address":"axelarvaloper1rnfpyyhr3jgpe5vyn204f3gyk9r5r3lzh3dqxe","moniker":"oraclenode","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper1ckg9aus8tv9xayyc9pzz8yxvrpty9mmnc09yak","moniker":"pluto","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":true}},{"operator_address":"axelarvaloper1u3z068nvy2u36tqmmul7q90as8w3tpjqtnrxrq","moniker":"BwareLabs","tss_illegibility_info":{"tombstoned":false,"jailed":false,"missed_too_many_blocks":true,"no_proxy_registered":false,"tss_suspended":false,"proxy_insuficient_funds":false,"stale_tss_heartbeat":false}}]}
-docker exec -it axelar-core axelard q snapshot validators -oj | jq '.validators | .[] | select(.operator_address=="axelarvaloper1uxa5r6hpd5vla6tndduhxr8gpsv5jfjgczrlwr")'
-
-'''
 def getvalidatorsnapshot():
     command = f"docker exec -it axelar-core axelard q snapshot validators -oj | jq '.validators | .[] | select(.operator_address==\"{VALOPER_ADDR}\")'"
     output,error  = subprocess.Popen(command, universal_newlines=True, shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     print(f'validator state output {output}.')
-    response_json = str(command)
-    return response_json
+    #response_json = str(command)
+    return command
 
 def formatinmarkdown(input):
     if input is not None:
@@ -164,59 +114,6 @@ def formatinmarkdown(input):
         return None
 
 
-
-
-def check_node_sync():
-    d = get_node_status()
-    global COUNT
-
-    if d == None:
-        msg = NODE_NAME + " | unable to reach mina daemon. Attention required!!!"
-        record_status(msg, type='alert')
-    else:
-        try: #fix for issue with length provided as NoneType by daemon
-            delta_height = int(d["highestUnvalidatedBlockLengthReceived"]) -  int(d["blockchainLength"])
-        except:
-            delta_height = "NA"
-    
-        current_epoch_time = int(time.time()*1000)
-        next_block_in_sec = int(d["nextBlockTime"]) - current_epoch_time
-        next_block_in = str(datetime.timedelta(milliseconds=next_block_in_sec)).split(".")[0]
-        uptime_readable = str(datetime.timedelta(seconds=d["uptime"]))
-        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        base_msg = current_time + "|" + NODE_NAME + "|" + d["sync_status"] + "|" + uptime_readable + "|" + str(d["blockchainLength"]) + "|" + \
-                    str(d["highestBlockLengthReceived"]) + "|" + str(d["highestUnvalidatedBlockLengthReceived"]) + "|" + \
-                    str(delta_height) + "|" + next_block_in + "| "
-
-        minaexplorerblockheight = getminaexplorerblockheight()
-        if minaexplorerblockheight is not None and minaexplorerblockheight - int(d["blockchainLength"]) > 2:
-            restart_node()
-            msg = base_msg + " synced on wrong height.Actual height is " + "|" + str(minaexplorerblockheight)
-            record_status(msg, type='alert')
-
-        
-        # Action logic for different scenarios
-        if d["sync_status"] == "SYNCED" and delta_height == 0: #perfect scenario
-            msg = base_msg + "no action taken"
-            record_status(msg)
-            COUNT = 0
-
-
-        elif d["sync_status"] in {"SYNCED","CATCHUP"} and COUNT <= WAIT_TIME_IN_CHECKS: #OK to wait a few minutes    
-            msg = base_msg + "waiting for few mins" 
-            record_status(msg, type='alert')
-            COUNT = COUNT + 1
-
-        elif d["sync_status"] in {"SYNCED","CATCHUP"}  and COUNT > WAIT_TIME_IN_CHECKS: #restart routine  
-            msg = base_msg + "restarting node"  
-            record_status(msg, type='alert')
-            restart_node()
-            COUNT = 0   
-          
-        else:
-            msg = base_msg + " in unknown mode. Attention required"
-            record_status(msg, type='alert')
 
 if __name__ == "__main__": 
        
