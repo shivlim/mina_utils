@@ -64,19 +64,6 @@ def record_status(msg, type="standard"):
     ln.handlers.clear() # to avoid multiple instances of loggers getting created
 
 
-def getminaexplorerblockheight():
-    try:
-        url = 'https://api.minaexplorer.com/'
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        r = urllib.request.urlopen(req).read()
-        content = json.loads(r.decode('utf-8'))
-        return int(content['blockchainLength'])
-    except:
-        record_status("unable to retrieve height from minaexplorer")
-        return None
-
-
-
 def getvalidatorsnapshot():
     command = f"docker exec -it axelar-core axelard q snapshot validators -oj | jq '.validators | .[] | select(.operator_address==\"{VALOPER_ADDR}\")'"
     output,error  = subprocess.Popen(command, universal_newlines=True, shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
@@ -120,7 +107,9 @@ if __name__ == "__main__":
     while True:
         try:
             validator_snapshot = getvalidatorsnapshot()
+            print(f'validator_snapshot is {validator_snapshot}')
             formatted_text = formatinmarkdown(validator_snapshot)
+            print(f'formatted_text is {formatted_text}')
             bot.sendMessage(chat_id=CHAT_ID, text=formatted_text, timeout=20,parse_mode='MarkdownV2')
         except Exception as e:
             msg = str(e)
