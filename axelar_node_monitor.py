@@ -26,13 +26,13 @@ VALOPER_ADDR       = str(c["VALOPER_ADDR"])
 MARKDOWN_ALERT = """ 
 \| metric  \| status \|
 \| ------------- \|:-------------:\|
-\| tombstoned_status      \| {tombstoned_status}     \|
-\| jailed_status      \| {jailed_status}    \|
-\| missed_too_many_blocks_status      \| {missed_too_many_blocks_status}     \|
-\| no_proxy_registered_status      \| {no_proxy_registered_status}    \|
-\| tss_suspended_status      \| {tss_suspended_status}     \|
-\| proxy_insuficient_funds_status      \| {proxy_insuficient_funds_status}     \|
-\| stale_tss_heartbeat_status      \| {stale_tss_heartbeat_status}     \|
+\| tombstonedstatus      \| {tombstonedstatus}     \|
+\| jailedstatus      \| {jailedstatus}    \|
+\| missedtoomanyblocksstatus      \| {missedtoomanyblocksstatus}     \|
+\| noproxyregisteredstatus      \| {noproxyregisteredstatus}    \|
+\| tsssuspendedstatus      \| {tsssuspendedstatus}     \|
+\| proxyinsuficientfundsstatus      \| {proxyinsuficientfundsstatus}     \|
+\| staletssheartbeatstatus      \| {staletssheartbeatstatus}     \|
 """
 
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
@@ -76,26 +76,26 @@ def formatinmarkdown(input):
         input = json.loads(input)
         tss_illegibility_info = input['tss_illegibility_info']
         if tss_illegibility_info is not None:
-            tombstoned_status = tss_illegibility_info['tombstoned']
-            jailed_status = tss_illegibility_info['jailed']
-            missed_too_many_blocks_status = tss_illegibility_info['missed_too_many_blocks']
-            no_proxy_registered_status = tss_illegibility_info['no_proxy_registered']
-            tss_suspended_status = tss_illegibility_info['tss_suspended']
-            proxy_insuficient_funds_status = tss_illegibility_info['proxy_insuficient_funds']
-            stale_tss_heartbeat_status = tss_illegibility_info['stale_tss_heartbeat']
+            tombstonedstatus = tss_illegibility_info['tombstoned']
+            jailedstatus = tss_illegibility_info['jailed']
+            missedtoomanyblocksstatus = tss_illegibility_info['missed_too_many_blocks']
+            noproxyregisteredstatus = tss_illegibility_info['no_proxy_registered']
+            tsssuspendedstatus = tss_illegibility_info['tss_suspended']
+            proxyinsuficientfundsstatus = tss_illegibility_info['proxy_insuficient_funds']
+            staletssheartbeatstatus = tss_illegibility_info['stale_tss_heartbeat']
             print(f'status is {tss_illegibility_info}')
-            if not tombstoned_status or not jailed_status or not missed_too_many_blocks_status or \
-                not no_proxy_registered_status or not tss_suspended_status or not proxy_insuficient_funds_status \
-                or not stale_tss_heartbeat_status:
+            if not tombstonedstatus or not jailedstatus or not missedtoomanyblocksstatus or \
+                not noproxyregisteredstatus or not tsssuspendedstatus or not proxyinsuficientfundsstatus \
+                or not staletssheartbeatstatus:
                 print(f'status is not correct {tss_illegibility_info}.Sending telegram RED alert ❌')
                 MARKDOWN_ALERT.format(
-                    tombstoned_status="❌" if tss_illegibility_info['tombstoned'] else "✅",
-                    jailed_status="❌" if tss_illegibility_info['jailed'] else "✅",
-                    missed_too_many_blocks_status="❌" if tss_illegibility_info['missed_too_many_blocks'] else "✅",
-                    no_proxy_registered_status="❌" if tss_illegibility_info['no_proxy_registered'] else "✅",
-                    tss_suspended_status="❌" if tss_illegibility_info['tss_suspended'] else "✅",
-                    proxy_insuficient_funds_status="❌" if tss_illegibility_info['proxy_insuficient_funds'] else "✅",
-                    stale_tss_heartbeat_status="❌" if tss_illegibility_info['stale_tss_heartbeat'] else "✅"
+                    tombstonedstatus="❌" if tss_illegibility_info['tombstoned'] else "✅",
+                    jailedstatus="❌" if tss_illegibility_info['jailed'] else "✅",
+                    missedtoomanyblocksstatus="❌" if tss_illegibility_info['missed_too_many_blocks'] else "✅",
+                    noproxyregisteredstatus="❌" if tss_illegibility_info['no_proxy_registered'] else "✅",
+                    tsssuspendedstatus="❌" if tss_illegibility_info['tss_suspended'] else "✅",
+                    proxyinsuficientfundsstatus="❌" if tss_illegibility_info['proxy_insuficient_funds'] else "✅",
+                    staletssheartbeatstatus="❌" if tss_illegibility_info['stale_tss_heartbeat'] else "✅"
                 )
                 return MARKDOWN_ALERT
     else:
