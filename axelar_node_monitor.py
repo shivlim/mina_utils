@@ -25,7 +25,7 @@ VALOPER_ADDR       = str(c["VALOPER_ADDR"])
 
 MARKDOWN_ALERT = """ 
 \| metric  \| status \|
-\| ------------- \|:-------------:\|
+\| \-\-\-\-\-\-\-\-\-\-\-\-\- \|:\-\-\-\-\-\-\-\-\-\-\-\-\-:\|
 \| tombstonedstatus      \| {tombstonedstatus}     \|
 \| jailedstatus      \| {jailedstatus}    \|
 \| missedtoomanyblocksstatus      \| {missedtoomanyblocksstatus}     \|
