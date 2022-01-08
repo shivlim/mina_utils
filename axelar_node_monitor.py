@@ -69,7 +69,7 @@ def getvalidatorsnapshot():
     output,error  = subprocess.Popen(command, universal_newlines=True, shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     print(f'validator state output {output}.')
     #response_json = str(command)
-    return command
+    return output
 
 def formatinmarkdown(input):
     if input is not None:
