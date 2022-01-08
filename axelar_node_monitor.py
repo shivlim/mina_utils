@@ -24,15 +24,15 @@ CHECK_FREQ_IN_MIN        = int(c["CHECK_FREQ_IN_MIN"])
 VALOPER_ADDR       = str(c["VALOPER_ADDR"])
 
 MARKDOWN_ALERT = """ 
-| metric  | status |
-| ------------- |:-------------:|
-| tombstoned_status      | {tombstoned_status}     |
-| jailed_status      | {jailed_status}    |
-| missed_too_many_blocks_status      | {missed_too_many_blocks_status}     |
-| no_proxy_registered_status      | {no_proxy_registered_status}    |
-| tss_suspended_status      | {tss_suspended_status}     |
-| proxy_insuficient_funds_status      | {proxy_insuficient_funds_status}     |
-| stale_tss_heartbeat_status      | {stale_tss_heartbeat_status}     |
+\| metric  \| status |
+\| ------------- \|:-------------:\|
+\| tombstoned_status      \| {tombstoned_status}     \|
+\| jailed_status      \| {jailed_status}    \|
+\| missed_too_many_blocks_status      \| {missed_too_many_blocks_status}     \|
+\| no_proxy_registered_status      \| {no_proxy_registered_status}    \|
+\| tss_suspended_status      \| {tss_suspended_status}     \|
+\| proxy_insuficient_funds_status      \| {proxy_insuficient_funds_status}     \|
+\| stale_tss_heartbeat_status      \| {stale_tss_heartbeat_status}     \|
 """
 
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
