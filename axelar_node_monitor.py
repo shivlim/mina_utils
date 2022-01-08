@@ -138,21 +138,21 @@ if __name__ == "__main__":
 
             responseavax,responseavaxstatus = getrpcendpointresponse(AVAX_RPC_ENDPOINT,AVAX_RPC_REQUEST)
             if responseavaxstatus and responseavax['result']['isBootstrapped']:
-                formatted_text += "\n" + "avax_rpc_status ✅"
+                formatted_text += " avax_rpc_status ✅ "
             else:
-                formatted_text += "\n" + "avax_rpc_status ❌"
+                formatted_text += " avax_rpc_status ❌ "
 
             responsefantom, responsefantomstatus = getrpcendpointresponse(FANTOM_RPC_ENDPOINT, FANTOM_RPC_REQUEST)
-            if responsefantomstatus and responsefantom['result']:
-                formatted_text += "\n" + "fantom_rpc_status ✅"
+            if responsefantomstatus and responsefantom['result'] is False:
+                formatted_text += " fantom_rpc_status ✅ "
             else:
-                formatted_text += "\n" + "fantom_rpc_status ❌"
+                formatted_text += " fantom_rpc_status ❌ "
 
-            responsefantom, responsefantomstatus = getrpcendpointresponse(FANTOM_RPC_ENDPOINT, FANTOM_RPC_REQUEST)
-            if responsefantomstatus and responsefantom['result']:
-                formatted_text += "\n" + "fantom_rpc_status ✅"
+            responseeth, responseethstatus = getrpcendpointresponse(ETH_RPC_ENDPOINT, ETH_RPC_REQUEST)
+            if responseethstatus and responseeth['result'] is False:
+                formatted_text += " eth_rpc_status ✅ "
             else:
-                formatted_text += "\n" + "fantom_rpc_status ❌"
+                formatted_text += " eth_rpc_status ❌ "
             bot.sendMessage(chat_id=CHAT_ID, text=formatted_text, timeout=20,parse_mode='MarkdownV2')
         except Exception as e:
             msg = str(e)
