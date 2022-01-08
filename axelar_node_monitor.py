@@ -73,6 +73,7 @@ def getvalidatorsnapshot():
 
 def formatinmarkdown(input):
     if input is not None:
+        input = json.loads(input)
         tss_illegibility_info = input['tss_illegibility_info']
         if tss_illegibility_info is not None:
             tombstoned_status = tss_illegibility_info['tombstoned']
