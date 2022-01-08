@@ -24,7 +24,7 @@ CHECK_FREQ_IN_MIN        = int(c["CHECK_FREQ_IN_MIN"])
 VALOPER_ADDR       = str(c["VALOPER_ADDR"])
 
 MARKDOWN_ALERT = """ 
-\| metric  \| status |
+\| metric  \| status \|
 \| ------------- \|:-------------:\|
 \| tombstoned_status      \| {tombstoned_status}     \|
 \| jailed_status      \| {jailed_status}    \|
