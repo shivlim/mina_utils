@@ -23,17 +23,16 @@ WAIT_TIME_IN_CHECKS        = int(c["WAIT_TIME_IN_CHECKS"])
 CHECK_FREQ_IN_MIN        = int(c["CHECK_FREQ_IN_MIN"])
 VALOPER_ADDR       = str(c["VALOPER_ADDR"])
 
-MARKDOWN_ALERT = """ 
-\| metric  \| status \|
-\| \-\-\-\-\-\-\-\-\-\-\-\-\- \|:\-\-\-\-\-\-\-\-\-\-\-\-\-:\|
-\| tombstonedstatus      \| \{tombstonedstatus\}     \|
-\| jailedstatus      \| \{jailedstatus\}    \|
-\| missedtoomanyblocksstatus      \| \{missedtoomanyblocksstatus\}     \|
-\| noproxyregisteredstatus      \| \{noproxyregisteredstatus\}    \|
-\| tsssuspendedstatus      \| \{tsssuspendedstatus\}     \|
-\| proxyinsuficientfundsstatus      \| \{proxyinsuficientfundsstatus\}     \|
-\| staletssheartbeatstatus      \| \{staletssheartbeatstatus\}     \|
-"""
+AVAX_RPC_ENDPOINT       = str(c["AVAX_RPC_ENDPOINT"])
+FANTOM_RPC_ENDPOINT       = str(c["FANTOM_RPC_ENDPOINT"])
+ETH_RPC_ENDPOINT       = str(c["ETH_RPC_ENDPOINT"])
+POLYGON_RPC_ENDPOINT       = str(c["POLYGON_RPC_ENDPOINT"])
+
+AVAX_RPC_REQUEST = { "jsonrpc":"2.0", "id":1, "method" :"info.isBootstrapped", "params": { "chain":"C" } }
+FANTOM_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
+ETH_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
+POLYGON_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
+
 
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
 
@@ -64,11 +63,29 @@ def record_status(msg, type="standard"):
     ln.handlers.clear() # to avoid multiple instances of loggers getting created
 
 
+def getrpcendpointresponse(endpoint,values):
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    data = json.dumps(values).encode("utf-8")
+
+    try:
+        req = urllib.request.Request(endpoint, data, headers)
+        with urllib.request.urlopen(req) as f:
+            res = f.read()
+        content = json.loads(res.decode('utf-8'))
+        return content,True
+    except Exception as e:
+        print(e)
+        return None,False
+
+
 def getvalidatorsnapshot():
     command = f"docker exec -it axelar-core axelard q snapshot validators -oj | jq '.validators | .[] | select(.operator_address==\"{VALOPER_ADDR}\")'"
     output,error  = subprocess.Popen(command, universal_newlines=True, shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     print(f'validator state output {output}.')
-    #response_json = str(command)
     return output
 
 def formatinmarkdown(input):
@@ -88,15 +105,23 @@ def formatinmarkdown(input):
                 not noproxyregisteredstatus or not tsssuspendedstatus or not proxyinsuficientfundsstatus \
                 or not staletssheartbeatstatus:
                 print(f'status is not correct {tss_illegibility_info}.Sending telegram RED alert ❌')
-                formatted_text = MARKDOWN_ALERT.format(
-                    tombstonedstatus="❌" if tss_illegibility_info['tombstoned'] else "✅",
-                    jailedstatus="❌" if tss_illegibility_info['jailed'] else "✅",
-                    missedtoomanyblocksstatus="❌" if tss_illegibility_info['missed_too_many_blocks'] else "✅",
-                    noproxyregisteredstatus="❌" if tss_illegibility_info['no_proxy_registered'] else "✅",
-                    tsssuspendedstatus="❌" if tss_illegibility_info['tss_suspended'] else "✅",
-                    proxyinsuficientfundsstatus="❌" if tss_illegibility_info['proxy_insuficient_funds'] else "✅",
-                    staletssheartbeatstatus="❌" if tss_illegibility_info['stale_tss_heartbeat'] else "✅"
-                )
+                tombstoned_status = "❌" if tombstonedstatus else "✅"
+                jailed_status = "❌" if jailedstatus else "✅"
+                missed_too_many_blocks_status = "❌" if missedtoomanyblocksstatus else "✅"
+                no_proxy_registered_status = "❌" if noproxyregisteredstatus else "✅"
+                tss_suspended_status = "❌" if tsssuspendedstatus else "✅"
+                proxy_insuficient_funds_status = "❌" if proxyinsuficientfundsstatus else "✅"
+                stale_tss_heartbeat_status = "❌" if staletssheartbeatstatus else "✅"
+
+                formatted_text = f""" 
+                                tombstoned_status {tombstoned_status}
+                                jailed_status {jailed_status}
+                                missed_too_many_blocks_status {missed_too_many_blocks_status}
+                                tss_suspended_status {tss_suspended_status}
+                                proxy_insuficient_funds_status {proxy_insuficient_funds_status}
+                                no_proxy_registered_status {no_proxy_registered_status}
+                                stale_tss_heartbeat_status {stale_tss_heartbeat_status}
+                                """
                 print(f'formatted_text {formatted_text}')
                 return formatted_text
     else:
@@ -109,9 +134,25 @@ if __name__ == "__main__":
     while True:
         try:
             validator_snapshot = getvalidatorsnapshot()
-            print(f'validator_snapshot is {validator_snapshot}')
             formatted_text = formatinmarkdown(validator_snapshot)
-            print(f'formatted_text is {formatted_text}')
+
+            responseavax,responseavaxstatus = getrpcendpointresponse(AVAX_RPC_ENDPOINT,AVAX_RPC_REQUEST)
+            if responseavaxstatus and responseavax['result']['isBootstrapped']:
+                formatted_text += "\n" + "avax_rpc_status ✅"
+            else:
+                formatted_text += "\n" + "avax_rpc_status ❌"
+
+            responsefantom, responsefantomstatus = getrpcendpointresponse(FANTOM_RPC_ENDPOINT, FANTOM_RPC_REQUEST)
+            if responsefantomstatus and responsefantom['result']:
+                formatted_text += "\n" + "fantom_rpc_status ✅"
+            else:
+                formatted_text += "\n" + "fantom_rpc_status ❌"
+
+            responsefantom, responsefantomstatus = getrpcendpointresponse(FANTOM_RPC_ENDPOINT, FANTOM_RPC_REQUEST)
+            if responsefantomstatus and responsefantom['result']:
+                formatted_text += "\n" + "fantom_rpc_status ✅"
+            else:
+                formatted_text += "\n" + "fantom_rpc_status ❌"
             bot.sendMessage(chat_id=CHAT_ID, text=formatted_text, timeout=20,parse_mode='MarkdownV2')
         except Exception as e:
             msg = str(e)
