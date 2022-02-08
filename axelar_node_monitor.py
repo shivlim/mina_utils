@@ -91,7 +91,7 @@ def getvalidatorsnapshot():
 
 def formatinmarkdown(input):
     if input is not None:
-        input = json.loads(input)
+        #input = json.loads(input)
         tss_illegibility_info = input['tss_illegibility_info']
         if tss_illegibility_info is not None:
             tombstonedstatus = tss_illegibility_info['tombstoned']
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     while True:
         try:
             #validator_snapshot = getvalidatorsnapshot()
-            validator_snapshot = '''{
+            validator_snapshot = {
               "operator_address": "axelarvaloper1wsw3n6wrc0ku3jn9c46rvz4q2ueldwrx0x0rk3",
               "moniker": "4SV",
               "tss_illegibility_info": {
@@ -146,7 +146,7 @@ if __name__ == "__main__":
                 "proxy_insuficient_funds": False,
                 "stale_tss_heartbeat": False
               }
-            }'''
+            }
             formatted_text = formatinmarkdown(validator_snapshot)
 
             if formatted_text is None:
