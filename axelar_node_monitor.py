@@ -161,13 +161,10 @@ if __name__ == "__main__":
 
 
             responseeth, responseethstatus = getrpcendpointresponse(ETH_RPC_ENDPOINT, ETH_RPC_REQUEST)
-            print(f'responseeth {responseeth}')
-            print(f'responseethstatus {responseethstatus}')
             if responseethstatus and responseeth['result'] is False:
                 formatted_text += " eth_rpc_status ✅ "
             else:
                 formatted_text += " eth_rpc_status ❌ "
-            print(f' formatted_text {formatted_text}')
 
             responsemoonbeam, responsemoonbeamstatus = getrpcendpointresponse(MOONBEAM_RPC_ENDPOINT,
                                                                               MOONBEAM_RPC_REQUEST)
@@ -176,7 +173,6 @@ if __name__ == "__main__":
             else:
                 formatted_text += " moonbeam_rpc_status ❌ "
 
-            print(f' formatted_text {formatted_text}')
 
             responsepolygon, responsepolygonstatus = getrpcendpointresponse(POLYGON_RPC_ENDPOINT, POLYGON_RPC_REQUEST)
             if responsepolygonstatus and responsepolygon['result'] is False:
