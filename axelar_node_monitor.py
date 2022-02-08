@@ -190,5 +190,6 @@ if __name__ == "__main__":
             bot.sendMessage(chat_id=CHAT_ID, text=formatted_text, timeout=20)
         except Exception as e:
             msg = str(e)
+            print(f'message {msg}')
             record_status(msg, type='alert')
         sleep(60 * CHECK_FREQ_IN_MIN)
