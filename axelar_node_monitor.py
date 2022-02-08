@@ -141,6 +141,8 @@ if __name__ == "__main__":
         try:
             validator_snapshot = getvalidatorsnapshot()
             formatted_text = formatinmarkdown(validator_snapshot)
+            if formatted_text is None:
+                formatted_text = "Testnet - All Ok ✅ "
 
             responseavax, responseavaxstatus = getrpcendpointresponse(AVAX_RPC_ENDPOINT, AVAX_RPC_REQUEST)
             if responseavaxstatus and responseavax['result']['isBootstrapped']:
