@@ -27,11 +27,13 @@ AVAX_RPC_ENDPOINT       = str(c["AVAX_RPC_ENDPOINT"])
 FANTOM_RPC_ENDPOINT       = str(c["FANTOM_RPC_ENDPOINT"])
 ETH_RPC_ENDPOINT       = str(c["ETH_RPC_ENDPOINT"])
 POLYGON_RPC_ENDPOINT       = str(c["POLYGON_RPC_ENDPOINT"])
+MOONBEAM_RPC_ENDPOINT       = str(c["MOONBEAM_RPC_ENDPOINT"])
 
 AVAX_RPC_REQUEST = { "jsonrpc":"2.0", "id":1, "method" :"info.isBootstrapped", "params": { "chain":"C" } }
 FANTOM_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
 ETH_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
 POLYGON_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
+MOONBEAM_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
 
 
 bot=telegram.Bot(token=TELEGRAM_TOKEN)
@@ -153,6 +155,19 @@ if __name__ == "__main__":
                 formatted_text += " eth_rpc_status ✅ "
             else:
                 formatted_text += " eth_rpc_status ❌ "
+
+            responsemoonbeam, responsemoonbeamstatus = getrpcendpointresponse(MOONBEAM_RPC_ENDPOINT, MOONBEAM_RPC_REQUEST)
+            if responsemoonbeamstatus and responsemoonbeam['result'] is False:
+                formatted_text += " moonbeam_rpc_status ✅ "
+            else:
+                formatted_text += " moonbeam_rpc_status ❌ "
+
+            responsepolygon, responsepolygonstatus = getrpcendpointresponse(POLYGON_RPC_ENDPOINT, POLYGON_RPC_REQUEST)
+            if responsepolygonstatus and responsepolygon['result'] is False:
+                formatted_text += " polygon_rpc_status ✅ "
+            else:
+                formatted_text += " polygon_rpc_status ❌ "
+
             bot.sendMessage(chat_id=CHAT_ID, text=formatted_text, timeout=20,parse_mode='MarkdownV2')
         except Exception as e:
             msg = str(e)
