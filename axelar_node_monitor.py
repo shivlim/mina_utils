@@ -145,7 +145,6 @@ if __name__ == "__main__":
             if formatted_text is None:
                 formatted_text = "Testnet - All Ok ✅ "
 
-            print(f' formatted_text {formatted_text}')
 
             responseavax, responseavaxstatus = getrpcendpointresponse(AVAX_RPC_ENDPOINT, AVAX_RPC_REQUEST)
             if responseavaxstatus and responseavax['result']['isBootstrapped']:
@@ -153,7 +152,6 @@ if __name__ == "__main__":
             else:
                 formatted_text += " avax_rpc_status ❌ "
 
-            print(f' formatted_text {formatted_text}')
 
             responsefantom, responsefantomstatus = getrpcendpointresponse(FANTOM_RPC_ENDPOINT, FANTOM_RPC_REQUEST)
             if responsefantomstatus and responsefantom['result'] is False:
@@ -161,9 +159,10 @@ if __name__ == "__main__":
             else:
                 formatted_text += " fantom_rpc_status ❌ "
 
-            print(f' formatted_text {formatted_text}')
 
             responseeth, responseethstatus = getrpcendpointresponse(ETH_RPC_ENDPOINT, ETH_RPC_REQUEST)
+            print(f'responseeth {responseeth}')
+            print(f'responseethstatus {responseethstatus}')
             if responseethstatus and responseeth['result'] is False:
                 formatted_text += " eth_rpc_status ✅ "
             else:
