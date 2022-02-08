@@ -168,7 +168,7 @@ if __name__ == "__main__":
             else:
                 formatted_text += " polygon_rpc_status ❌ "
 
-            bot.sendMessage(chat_id=CHAT_ID, text=formatted_text, timeout=20,parse_mode='MarkdownV2')
+            bot.sendMessage(chat_id=CHAT_ID, text=formatted_text, timeout=20)
         except Exception as e:
             msg = str(e)
             record_status(msg, type='alert')
