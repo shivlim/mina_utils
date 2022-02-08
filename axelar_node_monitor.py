@@ -13,59 +13,56 @@ import json
 
 c = yaml.load(open('config.yml', encoding='utf8'), Loader=yaml.SafeLoader)
 
-TELEGRAM_TOKEN      = str(c["TELEGRAM_TOKEN"])
-CHAT_ID             = str(c["CHAT_ID"])
-CHAT_ID_ALERT       = str(c["CHAT_ID_ALERT"])
-NODE_NAME           = str(c["NODE_NAME"])
-GRAPHQL_HOST        = str(c["GRAPHQL_HOST"])
-GRAPHQL_PORT        = int(c["GRAPHQL_PORT"])
-WAIT_TIME_IN_CHECKS        = int(c["WAIT_TIME_IN_CHECKS"])
-CHECK_FREQ_IN_MIN        = int(c["CHECK_FREQ_IN_MIN"])
-VALOPER_ADDR       = str(c["VALOPER_ADDR"])
+TELEGRAM_TOKEN = str(c["TELEGRAM_TOKEN"])
+CHAT_ID = str(c["CHAT_ID"])
+CHAT_ID_ALERT = str(c["CHAT_ID_ALERT"])
+NODE_NAME = str(c["NODE_NAME"])
+GRAPHQL_HOST = str(c["GRAPHQL_HOST"])
+GRAPHQL_PORT = int(c["GRAPHQL_PORT"])
+WAIT_TIME_IN_CHECKS = int(c["WAIT_TIME_IN_CHECKS"])
+CHECK_FREQ_IN_MIN = int(c["CHECK_FREQ_IN_MIN"])
+VALOPER_ADDR = str(c["VALOPER_ADDR"])
 
-AVAX_RPC_ENDPOINT       = str(c["AVAX_RPC_ENDPOINT"])
-FANTOM_RPC_ENDPOINT       = str(c["FANTOM_RPC_ENDPOINT"])
-ETH_RPC_ENDPOINT       = str(c["ETH_RPC_ENDPOINT"])
-POLYGON_RPC_ENDPOINT       = str(c["POLYGON_RPC_ENDPOINT"])
-MOONBEAM_RPC_ENDPOINT       = str(c["MOONBEAM_RPC_ENDPOINT"])
+AVAX_RPC_ENDPOINT = str(c["AVAX_RPC_ENDPOINT"])
+FANTOM_RPC_ENDPOINT = str(c["FANTOM_RPC_ENDPOINT"])
+ETH_RPC_ENDPOINT = str(c["ETH_RPC_ENDPOINT"])
+POLYGON_RPC_ENDPOINT = str(c["POLYGON_RPC_ENDPOINT"])
+MOONBEAM_RPC_ENDPOINT = str(c["MOONBEAM_RPC_ENDPOINT"])
 
-AVAX_RPC_REQUEST = { "jsonrpc":"2.0", "id":1, "method" :"info.isBootstrapped", "params": { "chain":"C" } }
-FANTOM_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
-ETH_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
-POLYGON_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
-MOONBEAM_RPC_REQUEST = {"id":1, "jsonrpc":"2.0", "method": "eth_syncing", "params":[]}
+AVAX_RPC_REQUEST = {"jsonrpc": "2.0", "id": 1, "method": "info.isBootstrapped", "params": {"chain": "C"}}
+FANTOM_RPC_REQUEST = {"id": 1, "jsonrpc": "2.0", "method": "eth_syncing", "params": []}
+ETH_RPC_REQUEST = {"id": 1, "jsonrpc": "2.0", "method": "eth_syncing", "params": []}
+POLYGON_RPC_REQUEST = {"id": 1, "jsonrpc": "2.0", "method": "eth_syncing", "params": []}
+MOONBEAM_RPC_REQUEST = {"id": 1, "jsonrpc": "2.0", "method": "eth_syncing", "params": []}
 
-
-bot=telegram.Bot(token=TELEGRAM_TOKEN)
-
+bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 COUNT = 0
-
 
 
 def record_status(msg, type="standard"):
     # sending a telgram message
     chat_id = CHAT_ID
-    chat_id_alert  = CHAT_ID_ALERT
+    chat_id_alert = CHAT_ID_ALERT
     bot.sendMessage(chat_id=chat_id, text=msg, timeout=20)
 
     # additional message to the alert channel
-    if type=="alert":
+    if type == "alert":
         bot.sendMessage(chat_id=chat_id_alert, text=msg, timeout=20)
-    
+
     # this is for the console
-    print(msg) 
-    
+    print(msg)
+
     # to record in log file  
     ln = logging.getLogger('main_logger')
-    ln.setLevel('INFO')  
+    ln.setLevel('INFO')
     fh = logging.FileHandler('nodestatus_logs/nodestatus_{:%Y%m%d}.log'.format(datetime.datetime.now()))
     ln.addHandler(fh)
     ln.info(msg)
-    ln.handlers.clear() # to avoid multiple instances of loggers getting created
+    ln.handlers.clear()  # to avoid multiple instances of loggers getting created
 
 
-def getrpcendpointresponse(endpoint,values):
+def getrpcendpointresponse(endpoint, values):
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -78,17 +75,25 @@ def getrpcendpointresponse(endpoint,values):
         with urllib.request.urlopen(req) as f:
             res = f.read()
         content = json.loads(res.decode('utf-8'))
-        return content,True
+        return content, True
     except Exception as e:
         print(e)
-        return None,False
+        return None, False
 
 
 def getvalidatorsnapshot():
     command = f"docker exec -it axelar-core axelard q snapshot validators -oj | jq '.validators | .[] | select(.operator_address==\"{VALOPER_ADDR}\")'"
-    output,error  = subprocess.Popen(command, universal_newlines=True, shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    output, error = subprocess.Popen(command, universal_newlines=True, shell=True, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE).communicate()
     print(f'validator state output {output}.')
     return output
+
+
+{'tombstoned': False, 'jailed': False, 'missed_too_many_blocks': False, 'no_proxy_registered': False,
+ 'tss_suspended': False, 'proxy_insuficient_funds': False, 'stale_tss_heartbeat': False}
+{'tombstoned': False, 'jailed': False, 'missed_too_many_blocks': False, 'no_proxy_registered': False,
+ 'tss_suspended': False, 'proxy_insuficient_funds': False, 'stale_tss_heartbeat': False}
+
 
 def formatinmarkdown(input):
     if input is not None:
@@ -103,9 +108,9 @@ def formatinmarkdown(input):
             proxyinsuficientfundsstatus = tss_illegibility_info['proxy_insuficient_funds']
             staletssheartbeatstatus = tss_illegibility_info['stale_tss_heartbeat']
             print(f'status is {tss_illegibility_info}')
-            if not tombstonedstatus or not jailedstatus or not missedtoomanyblocksstatus or \
-                not noproxyregisteredstatus or not tsssuspendedstatus or not proxyinsuficientfundsstatus \
-                or not staletssheartbeatstatus:
+            if tombstonedstatus or jailedstatus or missedtoomanyblocksstatus or \
+                    noproxyregisteredstatus or tsssuspendedstatus or proxyinsuficientfundsstatus \
+                    or staletssheartbeatstatus:
                 print(f'status is not correct {tss_illegibility_info}.Sending telegram RED alert ❌')
                 tombstoned_status = "❌" if tombstonedstatus else "✅"
                 jailed_status = "❌" if jailedstatus else "✅"
@@ -130,15 +135,14 @@ def formatinmarkdown(input):
         return None
 
 
+if __name__ == "__main__":
 
-if __name__ == "__main__": 
-       
     while True:
         try:
             validator_snapshot = getvalidatorsnapshot()
             formatted_text = formatinmarkdown(validator_snapshot)
 
-            responseavax,responseavaxstatus = getrpcendpointresponse(AVAX_RPC_ENDPOINT,AVAX_RPC_REQUEST)
+            responseavax, responseavaxstatus = getrpcendpointresponse(AVAX_RPC_ENDPOINT, AVAX_RPC_REQUEST)
             if responseavaxstatus and responseavax['result']['isBootstrapped']:
                 formatted_text += " avax_rpc_status ✅ "
             else:
@@ -156,7 +160,8 @@ if __name__ == "__main__":
             else:
                 formatted_text += " eth_rpc_status ❌ "
 
-            responsemoonbeam, responsemoonbeamstatus = getrpcendpointresponse(MOONBEAM_RPC_ENDPOINT, MOONBEAM_RPC_REQUEST)
+            responsemoonbeam, responsemoonbeamstatus = getrpcendpointresponse(MOONBEAM_RPC_ENDPOINT,
+                                                                              MOONBEAM_RPC_REQUEST)
             if responsemoonbeamstatus and responsemoonbeam['result'] is False:
                 formatted_text += " moonbeam_rpc_status ✅ "
             else:
@@ -172,5 +177,4 @@ if __name__ == "__main__":
         except Exception as e:
             msg = str(e)
             record_status(msg, type='alert')
-        sleep(60*CHECK_FREQ_IN_MIN)
-    
+        sleep(60 * CHECK_FREQ_IN_MIN)
