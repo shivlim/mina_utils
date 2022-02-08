@@ -141,8 +141,11 @@ if __name__ == "__main__":
         try:
             validator_snapshot = getvalidatorsnapshot()
             formatted_text = formatinmarkdown(validator_snapshot)
+
             if formatted_text is None:
                 formatted_text = "Testnet - All Ok ✅ "
+
+            print(f' formatted_text {formatted_text}')
 
             responseavax, responseavaxstatus = getrpcendpointresponse(AVAX_RPC_ENDPOINT, AVAX_RPC_REQUEST)
             if responseavaxstatus and responseavax['result']['isBootstrapped']:
@@ -150,17 +153,22 @@ if __name__ == "__main__":
             else:
                 formatted_text += " avax_rpc_status ❌ "
 
+            print(f' formatted_text {formatted_text}')
+
             responsefantom, responsefantomstatus = getrpcendpointresponse(FANTOM_RPC_ENDPOINT, FANTOM_RPC_REQUEST)
             if responsefantomstatus and responsefantom['result'] is False:
                 formatted_text += " fantom_rpc_status ✅ "
             else:
                 formatted_text += " fantom_rpc_status ❌ "
 
+            print(f' formatted_text {formatted_text}')
+
             responseeth, responseethstatus = getrpcendpointresponse(ETH_RPC_ENDPOINT, ETH_RPC_REQUEST)
             if responseethstatus and responseeth['result'] is False:
                 formatted_text += " eth_rpc_status ✅ "
             else:
                 formatted_text += " eth_rpc_status ❌ "
+            print(f' formatted_text {formatted_text}')
 
             responsemoonbeam, responsemoonbeamstatus = getrpcendpointresponse(MOONBEAM_RPC_ENDPOINT,
                                                                               MOONBEAM_RPC_REQUEST)
@@ -168,6 +176,8 @@ if __name__ == "__main__":
                 formatted_text += " moonbeam_rpc_status ✅ "
             else:
                 formatted_text += " moonbeam_rpc_status ❌ "
+
+            print(f' formatted_text {formatted_text}')
 
             responsepolygon, responsepolygonstatus = getrpcendpointresponse(POLYGON_RPC_ENDPOINT, POLYGON_RPC_REQUEST)
             if responsepolygonstatus and responsepolygon['result'] is False:
