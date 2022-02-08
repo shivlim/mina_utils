@@ -138,7 +138,7 @@ if __name__ == "__main__":
               "operator_address": "axelarvaloper1wsw3n6wrc0ku3jn9c46rvz4q2ueldwrx0x0rk3",
               "moniker": "4SV",
               "tss_illegibility_info": {
-                "tombstoned": False,
+                "tombstoned": True,
                 "jailed": False,
                 "missed_too_many_blocks": False,
                 "no_proxy_registered": False,
