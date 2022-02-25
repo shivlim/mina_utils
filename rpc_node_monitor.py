@@ -67,8 +67,9 @@ if __name__ == "__main__":
             if formatted_text is None:
                 formatted_text = "Testnet - All Ok ✅ "
 
-
+            print(f'before avax {formatted_text}')
             responseavax, responseavaxstatus = getrpcendpointresponse(AVAX_RPC_ENDPOINT, AVAX_RPC_REQUEST)
+            print(f'after avax {formatted_text}')
             if responseavaxstatus and responseavax['result']['isBootstrapped']:
                 formatted_text += " avax_rpc_status ✅ "
             else:
