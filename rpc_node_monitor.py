@@ -74,12 +74,16 @@ if __name__ == "__main__":
             else:
                 formatted_text += " avax_rpc_status ❌ "
 
+            print(f'avx {formatted_text}')
+
 
             responsefantom, responsefantomstatus = getrpcendpointresponse(FANTOM_RPC_ENDPOINT, FANTOM_RPC_REQUEST)
             if responsefantomstatus and responsefantom['result'] is False:
                 formatted_text += " fantom_rpc_status ✅ "
             else:
                 formatted_text += " fantom_rpc_status ❌ "
+
+            print(f'fantom {formatted_text}')
 
 
             responseeth, responseethstatus = getrpcendpointresponse(ETH_RPC_ENDPOINT, ETH_RPC_REQUEST)
@@ -88,12 +92,16 @@ if __name__ == "__main__":
             else:
                 formatted_text += " eth_rpc_status ❌ "
 
+            print(f'eth {formatted_text}')
+
             responsemoonbeam, responsemoonbeamstatus = getrpcendpointresponse(MOONBEAM_RPC_ENDPOINT,
                                                                               MOONBEAM_RPC_REQUEST)
             if responsemoonbeamstatus and responsemoonbeam['result'] is False:
                 formatted_text += " moonbeam_rpc_status ✅ "
             else:
                 formatted_text += " moonbeam_rpc_status ❌ "
+
+            print(f'moonbeam {formatted_text}')
 
 
             responsepolygon, responsepolygonstatus = getrpcendpointresponse(POLYGON_RPC_ENDPOINT, POLYGON_RPC_REQUEST)
