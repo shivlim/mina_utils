@@ -17,7 +17,6 @@ GRAPHQL_HOST = str(c["GRAPHQL_HOST"])
 GRAPHQL_PORT = int(c["GRAPHQL_PORT"])
 WAIT_TIME_IN_CHECKS = int(c["WAIT_TIME_IN_CHECKS"])
 CHECK_FREQ_IN_MIN = int(c["CHECK_FREQ_IN_MIN"])
-VALOPER_ADDR = str(c["VALOPER_ADDR"])
 
 AVAX_RPC_ENDPOINT = str(c["AVAX_RPC_ENDPOINT"])
 FANTOM_RPC_ENDPOINT = str(c["FANTOM_RPC_ENDPOINT"])
@@ -31,7 +30,6 @@ ETH_RPC_REQUEST = {"id": 1, "jsonrpc": "2.0", "method": "eth_syncing", "params":
 POLYGON_RPC_REQUEST = {"id": 1, "jsonrpc": "2.0", "method": "eth_syncing", "params": []}
 MOONBEAM_RPC_REQUEST = {"id": 1, "jsonrpc": "2.0", "method": "eth_syncing", "params": []}
 
-bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 COUNT = 0
 
@@ -40,23 +38,6 @@ ln.setLevel('INFO')
 fh = logging.FileHandler('nodestatus_logs/nodestatus_{:%Y%m%d}.log'.format(datetime.datetime.now()))
 ln.addHandler(fh)
 
-def record_status(msg, type="standard"):
-    # sending a telgram message
-    chat_id = CHAT_ID
-    chat_id_alert = CHAT_ID_ALERT
-    bot.sendMessage(chat_id=chat_id, text=msg, timeout=20)
-
-    # additional message to the alert channel
-    if type == "alert":
-        bot.sendMessage(chat_id=chat_id_alert, text=msg, timeout=20)
-
-    # this is for the console
-    print(msg)
-
-    # to record in log file  
-
-    ln.info(msg)
-    ln.handlers.clear()  # to avoid multiple instances of loggers getting created
 
 
 def getrpcendpointresponse(endpoint, values):
