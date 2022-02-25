@@ -106,6 +106,7 @@ if __name__ == "__main__":
 
             ln.info(formatted_text)
         except Exception as e:
+            print(f'E {e}')
             msg = str(e)
             print(f'message {msg}')
         sleep(60 * CHECK_FREQ_IN_MIN)
